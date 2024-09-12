@@ -65,5 +65,5 @@ jobs:
           context: .
           platforms: "linux/amd64,linux/arm64/v8"
           push: ${{ github.event_name != 'pull_request' }}
-          tags: ${{ steps.meta.outputs.tags }}
+          tags: ghcr.io/pluralkit/nirn-proxy:${{ github.sha }}
           labels: ${{ steps.meta.outputs.labels }}
