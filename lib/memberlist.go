@@ -4,11 +4,27 @@ import (
 	"github.com/hashicorp/memberlist"
 	"os"
 	"time"
+	"net"
 )
 
-func InitMemberList(knownMembers []string, port int, proxyPort string, manager *QueueManager) *memberlist.Memberlist {
+func InitMemberList(advertiseAddr string, knownMembers []string, port int, proxyPort string, manager *QueueManager) *memberlist.Memberlist {
 	config := memberlist.DefaultLANConfig()
 	config.BindPort = port
+	if advertiseAddr != "" {
+		// i'm pretty sure being able to pass a dns name into BIND_IP is a quirk of go's http server
+		// but it's useful for us, so let's handle that for memberlist as well
+		if net.ParseIP(advertiseAddr) == nil {
+			addrs, err := net.LookupHost(advertiseAddr)
+			if err != nil {
+				panic(err)
+			}
+			if len(addrs) == 0 {
+				panic("memberlist init: could not find ip address for advertiseAddr")
+			}
+			advertiseAddr = addrs[0]
+		}
+		config.AdvertiseAddr = advertiseAddr
+	}
 	config.AdvertisePort = port
 	config.Delegate = NirnDelegate{
 		proxyPort: proxyPort,

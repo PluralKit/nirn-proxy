@@ -32,7 +32,7 @@ func setupLogger() {
 	lib.SetLogger(logger)
 }
 
-func initCluster(proxyPort string, manager *lib.QueueManager) *memberlist.Memberlist {
+func initCluster(bindIp string, proxyPort string, manager *lib.QueueManager) *memberlist.Memberlist {
 	port := lib.EnvGetInt("CLUSTER_PORT", 7946)
 
 	memberEnv := os.Getenv("CLUSTER_MEMBERS")
@@ -62,7 +62,7 @@ func initCluster(proxyPort string, manager *lib.QueueManager) *memberlist.Member
 		}
 	}
 
-	return lib.InitMemberList(members, port, proxyPort, manager)
+	return lib.InitMemberList(bindIp, members, port, proxyPort, manager)
 }
 
 func main() {
@@ -121,7 +121,7 @@ func main() {
 
 	// Wait for the http server to ready before joining the cluster
 	<-time.After(1 * time.Second)
-	initCluster(port, manager)
+	initCluster(bindIp, port, manager)
 
 	<-done
 	logger.Info("Server received shutdown signal")
