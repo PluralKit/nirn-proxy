@@ -3,7 +3,7 @@ WORKDIR /go/src/app
 COPY . .
 RUN CGO_ENABLED=0 go install -ldflags '-extldflags "-static"' -tags timetzdata -buildvcs=false
 
-FROM scratch
+FROM alpine:latest
 COPY --from=app-builder /go/bin/nirn-proxy /nirn-proxy
 # the tls certificates:
 # NB: this pulls directly from the upstream image, which already has ca-certificates:

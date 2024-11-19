@@ -5,6 +5,8 @@ import (
 	"os"
 	"time"
 	"net"
+	"log"
+	"strings"
 )
 
 func InitMemberList(advertiseAddr string, knownMembers []string, port int, proxyPort string, manager *QueueManager) *memberlist.Memberlist {
@@ -25,6 +27,29 @@ func InitMemberList(advertiseAddr string, knownMembers []string, port int, proxy
 		}
 		config.AdvertiseAddr = advertiseAddr
 	}
+	// i'm tired of fighting nomad/docker
+	// just get this working
+	log.Printf("hi %v\n", os.Getenv("FORCE_BIND_FDEF"))
+	if os.Getenv("FORCE_BIND_FDEF") == "true" {
+		config.AdvertiseAddr = func() string {
+			iface, err := net.InterfaceByName("eth0")
+			if err != nil {
+				panic("could not find eth0 interface")
+			}
+			addrs, err := iface.Addrs()
+			if err != nil {
+				panic("could not get addrs of eth0 interface")
+			}
+			for _, v := range addrs {
+				log.Printf("find fdef:: got addr %v\n", v.String())
+				if strings.Contains(v.String(), "fdef:") {
+					return strings.Split(v.String(), "/")[0]
+				}
+			}
+			panic("could not find fdef: address in eth0")
+		}()
+	}
+
 	config.AdvertisePort = port
 	config.Delegate = NirnDelegate{
 		proxyPort: proxyPort,
