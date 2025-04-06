@@ -30,7 +30,7 @@ func InitMemberList(advertiseAddr string, knownMembers []string, port int, proxy
 	// i'm tired of fighting nomad/docker
 	// just get this working
 	log.Printf("hi %v\n", os.Getenv("FORCE_BIND_FDAA"))
-	if os.Getenv("FORCE_BIND_FDEF") == "true" {
+	if os.Getenv("FORCE_BIND_FDAA") == "true" {
 		config.AdvertiseAddr = func() string {
 			iface, err := net.InterfaceByName("eth0")
 			if err != nil {
