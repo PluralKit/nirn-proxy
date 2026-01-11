@@ -285,6 +285,17 @@ func (m *QueueManager) fulfillRequest(resp *http.ResponseWriter, req *http.Reque
 	routeToHeader := req.Header.Get("nirn-routed-to")
 	req.Header.Del("nirn-routed-to")
 
+	// clean up fp headers
+	for _, header := range []string{"x-forwarded-for", "x-forwarded-port", "x-forwarded-proto", "x-forwarded-ssl"} {
+		req.Header.Del(header)
+	}
+
+	for header, _ := range req.Header {
+		if strings.HasPrefix(header, "fly") {
+			req.Header.Del(header)
+		}
+	}
+
 	if routeToHeader != "" {
 		RequestsRoutedRecv.Inc()
 	}
